@@ -69,13 +69,16 @@ const VIEWS = ['home', 'tank', 'esd', 'lpg', 'pipe', 'cdu', 'loop'];
 const MODS = { tank, esd, lpg, pipe, cdu, loop };
 for (const k in MODS) MODS[k].init($('v-' + k), ctx);
 function route() {
-  const v = VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'home';
+  const h = decodeURIComponent(location.hash.slice(1)), v = VIEWS.includes(h) ? h : 'home';
   VIEWS.forEach(n => { $('v-' + n).hidden = n !== v; });
-  document.querySelectorAll('#nav a').forEach(a => a.toggleAttribute('aria-current', a.getAttribute('href') === '#' + v) || a.removeAttribute('aria-current'));
-  document.querySelectorAll('#nav a').forEach(a => { if (a.getAttribute('href') === '#' + v) a.setAttribute('aria-current', 'page'); });
+  document.querySelectorAll('#nav a').forEach(a => { if (a.getAttribute('href') === '#' + v) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   document.title = 'SCADA I&C – ' + v.toUpperCase();
+  window.scrollTo(0, 0);
 }
-addEventListener('hashchange', route); route();
+window.addEventListener('hashchange', route);   // nav clicks, manual edits
+window.addEventListener('popstate', route);     // browser back / forward
+window.addEventListener('pageshow', route);     // bfcache restores
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', route); else route(); // direct /#loop URLs
 
 // ---- Simulation loop ----
 function tick() {

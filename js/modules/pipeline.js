@@ -4,6 +4,7 @@ const V = [{ id: 'SV-1', km: 40, open: true }, { id: 'SV-2', km: 80, open: true 
 let batches = [{ id: 'B-17', prod: 'Arab Light', head: 95, tail: 60 }, { id: 'B-18', prod: 'Basrah Medium', head: 55, tail: 20 }, { id: 'B-19', prod: 'Arab Light', head: 15, tail: 0 }];
 let leak = false, leakKm = 70, el, ctx, seq = 20;
 const P0 = 55, X = km => 64 + km / 120 * 496, Y = p => 220 - p / 60 * 190;
+const bx = v => v.km >= 120 ? X(v.km) - 80 : X(v.km) - 40; // badge x: right-aligned at KM120
 export function init(e, c) {
   el = e; ctx = c;
   el.innerHTML = `<h2>Crude Pipeline CPM <small>(API 1130)</small></h2><div class="dash">
@@ -35,7 +36,7 @@ export function tick(c) {
   s += `<path d="M64 220H560" stroke="var(--mut)" stroke-width="1.5"/>` + KM.map(k => `<path d="M${X(k)} 220v5" stroke="var(--mut)"/><text x="${X(k)}" y="262" text-anchor="middle">${k}</text>`).join('');
   s += `<text x="312" y="284" text-anchor="middle" style="font-weight:700">Distance (KM)</text>`;
   s += `<polyline fill="none" stroke="var(--cy)" stroke-width="3" points="${KM.map(k => `${X(k)},${Y(pr(k))}`).join(' ')}"/>`;
-  s += V.map(v => { const c2 = v.open ? 'var(--ok)' : 'var(--crit)'; return `<path d="M${X(v.km)} 30V227" stroke="${c2}" stroke-dasharray="4"/><rect x="${X(v.km) - 36}" y="227" width="72" height="20" rx="4" fill="var(--panel)" stroke="${c2}" stroke-width="1.5"/><text x="${X(v.km)}" y="241" text-anchor="middle" style="font-weight:700;font-size:10px">${v.id} KM${v.km} ${v.open ? '●' : '▲'}</text>`; }).join('');
+  s += V.map(v => { const c2 = v.open ? 'var(--ok)' : 'var(--crit)'; return `<path d="M${X(v.km)} 30V227" stroke="${c2}" stroke-dasharray="4"/><rect x="${bx(v)}" y="227" width="80" height="20" rx="4" fill="var(--panel)" stroke="${c2}" stroke-width="1.5"/><text x="${bx(v) + 40}" y="241" text-anchor="middle" style="font-weight:700;font-size:10px">${v.id} KM${v.km} ${v.open ? '●' : '▲'}</text>`; }).join('');
   if (lk) s += `<path d="M${X(leakKm)} 30V220" stroke="var(--crit)" stroke-width="2"/><text x="${X(leakKm)}" y="44" text-anchor="middle" style="fill:var(--crit);font-weight:700">▲ LEAK KM${leakKm}</text>`;
   $('pl-svg').innerHTML = s;
   const dv = blocked ? 0 : .5; batches.forEach(b => { b.head += dv; b.tail += dv; });

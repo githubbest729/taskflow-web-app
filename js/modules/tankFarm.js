@@ -7,6 +7,7 @@ const T = [
 ];
 const STRAP = [[0, 0], [1000, 700], [3000, 2150], [5000, 3600], [7000, 5050], [9000, 6500], [11000, 8000], [13000, 9500], [14000, 10000]];
 const strap = mm => { for (let i = 1; i < STRAP.length; i++) if (mm <= STRAP[i][0]) { const [a, b] = STRAP[i - 1], [c, d] = STRAP[i]; return b + (d - b) * (mm - a) / (c - a); } return STRAP.at(-1)[1]; };
+const vols = (mm, w) => { const tov = strap(mm), fw = Math.min(strap(w), tov); return { tov, fw, gov: tov - fw }; }; // API MPMS Ch.12: GOV = TOV - FW
 const state = l => l >= LV.HH ? ['crit', 'HH ▲'] : l >= LV.H ? ['warn', 'H ◆'] : l <= LV.LL ? ['crit', 'LL ▲'] : l <= LV.L ? ['warn', 'L ◆'] : ['ok', 'NORMAL ●'];
 const Y = p => 195 - p * 1.8;
 
@@ -33,7 +34,7 @@ export function init(el, ctx) {
   const q = id => el.querySelector('#' + id);
   const calc = () => {
     const lv = +q('n-lv').value, tt = +q('n-t').value, d = +q('n-d').value, w = +q('n-w').value;
-    const tov = strap(lv), fw = strap(w), gov = tov - fw, a = 341.0957 / (d * d), dt = tt - 15, vcf = Math.exp(-a * dt * (1 + .8 * a * dt)), nsv = gov * vcf;
+    const { tov, fw, gov } = vols(lv, w), a = 341.0957 / (d * d), dt = tt - 15, vcf = Math.exp(-a * dt * (1 + .8 * a * dt)), nsv = gov * vcf;
     q('n-out').innerHTML = [['TOV', tov.toFixed(1) + ' m³', 'Strap table'], ['Free water', fw.toFixed(1) + ' m³', 'Strap table'], ['GOV', gov.toFixed(1) + ' m³', 'TOV − FW'], ['ΔT', dt.toFixed(1) + ' °C', 'T − 15'], ['α₁₅', a.toExponential(3) + ' /°C', 'K0 / ρ²'], ['VCF', vcf.toFixed(5), 'API 11.1'], ['NSV', nsv.toFixed(1) + ' m³', 'GOV × VCF']]
       .map(([k, v, b], i, arr) => `<tr><td>${k}</td><td class="${i === arr.length - 1 ? 'big' : ''}">${v}</td><td><span class="badge">${b}</span></td></tr>`).join('');
   };
@@ -52,8 +53,8 @@ export function tick(ctx) {
     const f = $(`tk-f${i}`), h = t.lvl * 1.8; f.setAttribute('y', 195 - h); f.setAttribute('height', h);
     $(`tk-pl${i}`).setAttribute('d', `M40 ${195 - h}H80`);
     const tg = $(`tk-tag${i}`); tg.className = 'tag s-' + sv; tg.textContent = txt;
-    const mm = t.lvl / 100 * 14000, tov = strap(mm), gov = tov - strap(t.w);
-    $(`tk-r${i}`).innerHTML = [['Level', t.lvl.toFixed(1) + ' %'], ['Level', (t.lvl / 100 * t.h).toFixed(0) + ' mm'], ['Volume (TOV)', tov.toFixed(0) + ' m³'], ['Gross obs. vol (GOV)', gov.toFixed(0) + ' m³'], ['Temperature', t.t.toFixed(1) + ' °C'], ['Water interface', t.w.toFixed(0) + ' mm'], ['Mode', t.mode.toUpperCase()]].map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('');
+    const mm = t.lvl / 100 * t.h, { tov, fw, gov } = vols(mm, t.w);
+    $(`tk-r${i}`).innerHTML = [['Level', t.lvl.toFixed(1) + ' %'], ['Level', (t.lvl / 100 * t.h).toFixed(0) + ' mm'], ['TOV (total obs. vol.)', tov.toFixed(1) + ' m³'], ['Free water vol.', fw.toFixed(1) + ' m³'], ['GOV (TOV − FW)', gov.toFixed(1) + ' m³'], ['Temperature', t.t.toFixed(1) + ' °C'], ['Water interface', t.w.toFixed(0) + ' mm'], ['Mode', t.mode.toUpperCase()]].map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('');
   });
   ctx.s.tankState = worst; ctx.s.tank101 = T[0];
 }

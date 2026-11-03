@@ -1,4 +1,4 @@
-const VER = 'scada-v4';
+const VER = 'scada-v5';
 const STATIC = `${VER}-static`, DYN = `${VER}-dyn`;
 const PRECACHE = ['./','index.html','offline.html','manifest.webmanifest','favicon.svg','favicon.ico','css/styles.css','assets/icons.svg',
   'js/app.js','js/modules/tankFarm.js','js/modules/esdMatrix.js','js/modules/lpgPumps.js','js/modules/pipeline.js','js/modules/refinery.js','js/modules/loopCheck.js',
