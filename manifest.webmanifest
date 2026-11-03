@@ -1,0 +1,26 @@
+{
+  "name": "SCADA I&C Field Toolkit",
+  "short_name": "SCADA I&C",
+  "description": "Offline SCADA/I&C toolkit: tank farm, ESD C&E, LPG pumping, pipeline CPM, CDU-01, loop checking.",
+  "id": "/",
+  "start_url": "./index.html?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#0c1015",
+  "theme_color": "#0c1015",
+  "categories": ["utilities", "productivity", "business"],
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable"},
+    {"src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
+    {"src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}
+  ],
+  "shortcuts": [
+    {"name": "ESD Matrix", "short_name": "ESD", "url": "./index.html#esd", "icons": [{"src": "icons/icon-192.png", "sizes": "192x192"}]},
+    {"name": "Tank Farm", "short_name": "Tanks", "url": "./index.html#tank", "icons": [{"src": "icons/icon-192.png", "sizes": "192x192"}]},
+    {"name": "Loop Check", "short_name": "Loop", "url": "./index.html#loop", "icons": [{"src": "icons/icon-192.png", "sizes": "192x192"}]}
+  ]
+}

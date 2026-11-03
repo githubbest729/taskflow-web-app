@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+<symbol id="tank" viewBox="0 0 48 48"><path d="M8 12h32M10 12v28h28V12" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M10 26h28v14H10z" fill="currentColor" opacity=".45"/></symbol>
+<symbol id="pump" viewBox="0 0 48 48"><circle cx="24" cy="26" r="13" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M24 13h14v8M16 26l8-8v16z" fill="none" stroke="currentColor" stroke-width="2.5"/></symbol>
+<symbol id="valve" viewBox="0 0 48 48"><path d="M6 14l18 10L6 34zM42 14L24 24l18 10z" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M24 24V8M16 8h16" stroke="currentColor" stroke-width="2.5"/></symbol>
+<symbol id="transmitter" viewBox="0 0 48 48"><circle cx="24" cy="22" r="12" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M24 34v10M18 22h12" stroke="currentColor" stroke-width="2.5"/></symbol>
+<symbol id="pipe" viewBox="0 0 48 48"><path d="M2 20h44M2 28h44" stroke="currentColor" stroke-width="2.5"/></symbol>
+<symbol id="column" viewBox="0 0 48 48"><rect x="15" y="4" width="18" height="40" rx="8" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M15 14h18M15 22h18M15 30h18" stroke="currentColor" stroke-width="2"/></symbol>
+</svg>
