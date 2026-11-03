@@ -21,7 +21,7 @@ const vessel = i => `<svg class="vessel" viewBox="0 0 130 210" role="img" aria-l
 </svg>`;
 
 export function init(el, ctx) {
-  el.innerHTML = `<h2>Tank Farm — API 2350</h2><div class="dash">${T.map((t, i) => `
+  el.innerHTML = `<h2>Tank Farm — API 2350 <button type="button" class="info" aria-label="About this view" data-tip="Live levels against API 2350 HH/H/L/LL setpoints. Press FILL, HOLD or DRAIN on a tank, then use the calculator below to get NSV from gauge data.">ⓘ</button></h2><div class="dash">${T.map((t, i) => `
   <article class="card s4"><h3>${t.id} · ${t.prod} <span id="tk-tag${i}" class="tag"></span></h3>
    <div class="tk">${vessel(i)}<table class="tel"><tbody id="tk-r${i}"></tbody></table></div>
    <div class="row" role="group" aria-label="${t.id} mode" style="margin-top:.6rem">${['fill', 'hold', 'drain'].map(m => `<button class="btn" data-i="${i}" data-m="${m}" aria-pressed="${t.mode === m}">${m.toUpperCase()}</button>`).join('')}</div></article>`).join('')}
@@ -58,3 +58,7 @@ export function tick(ctx) {
   });
   ctx.s.tankState = worst; ctx.s.tank101 = T[0];
 }
+
+const syncBtns = () => document.querySelectorAll('#v-tank [data-m]').forEach(b => b.setAttribute('aria-pressed', T[b.dataset.i].mode === b.dataset.m));
+export function reset() { [[62, 31, 120], [48, 29, 90], [20, 27, 40]].forEach(([l, t, w], i) => Object.assign(T[i], { lvl: l, t, w, mode: 'hold' })); syncBtns(); }
+export function overfill() { T[0].lvl = 95.5; T[0].mode = 'fill'; syncBtns(); }

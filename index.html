@@ -26,10 +26,14 @@
 <header id="top">
   <h1>SCADA I&amp;C <span>Field Toolkit</span></h1>
   <div id="alarm-banner" class="banner s-off" role="alert" aria-live="assertive" aria-atomic="true">○ No active alarms</div>
+  <div class="demo"><label for="scn" class="sr">Demo scenarios</label>
+    <select id="scn"><option value="">Demo Scenarios…</option><option value="normal">Normal Production</option><option value="s1">Scenario 1: T-101 Overfill Trip</option><option value="s2">Scenario 2: Pipeline Leak at KM 70</option><option value="s3">Scenario 3: LPG Skid A High Vibration</option></select>
+    <button id="reset" class="btn" type="button">↺ Reset to Normal</button></div>
   <div class="hdr-r">
     <span id="alarm-count" class="tag s-off" role="status" aria-label="Unacknowledged alarms">○ UNACK 0</span>
     <span id="net" class="tag s-ok" role="status">● ONLINE</span>
     <time id="clock"></time>
+    <button id="help" class="btn" type="button" aria-haspopup="dialog">ⓘ Quick Guide</button>
     <button id="install" class="btn" hidden>⬇ Install</button>
   </div>
 </header>
@@ -44,7 +48,7 @@
 </nav>
 <main id="main" tabindex="-1">
   <section id="v-home" hidden>
-    <h2>Process Topology &amp; Mimic</h2>
+    <h2>Process Topology &amp; Mimic <button type="button" class="info" aria-label="About this view" data-tip="ISA-101 mimic of the process train. Press ACK on an alarm (or click the red header banner) to acknowledge it per ISA-18.2.">ⓘ</button></h2>
     <div class="card"><svg id="mimic" viewBox="0 0 800 170" role="img" aria-label="Process flow: tank, inlet valve, pumps, pipeline valve, pipeline, CDU-01"></svg></div>
     <div class="card"><h3>Alarm Summary <small>(ISA-18.2 style)</small></h3><ul id="alarm-list" class="alist"></ul></div>
   </section>
@@ -59,6 +63,17 @@
   <form method="dialog"><p id="dlg-text"></p>
     <div class="row"><button class="btn" value="cancel">Cancel</button><button class="btn pri" value="ok">Confirm</button></div></form>
 </dialog>
+<dialog id="guide" class="guide" aria-labelledby="g-title"><div class="gd">
+  <h2 id="g-title">Quick Guide</h2>
+  <div role="tablist" aria-label="Guide topics" class="gtabs">
+   <button role="tab" id="g-t1" aria-controls="g-p1" aria-selected="true">1 Overview</button><button role="tab" id="g-t2" aria-controls="g-p2" aria-selected="false" tabindex="-1">2 Tanks</button><button role="tab" id="g-t3" aria-controls="g-p3" aria-selected="false" tabindex="-1">3 ESD</button><button role="tab" id="g-t4" aria-controls="g-p4" aria-selected="false" tabindex="-1">4 LPG &amp; Pipe</button><button role="tab" id="g-t5" aria-controls="g-p5" aria-selected="false" tabindex="-1">5 Loop</button></div>
+  <div role="tabpanel" id="g-p1" aria-labelledby="g-t1"><h3>Overview &amp; Mimic</h3><p>The Mimic shows the process train: Tank T-101 → XV-101 → pumps P-A/B → MOV-301 → pipeline → CDU-01. Every node has a symbol <b>and</b> a status word (● normal, ◆ advisory, ▲ critical, ○ off) — colour is never the only cue (ISA-101).</p><ol><li>Watch the header banner and the <b>UNACK</b> counter.</li><li>Press <b>ACK</b> in the Alarm Summary (or click the banner): flashing red becomes solid muted red (ISA-18.2).</li><li>Use <b>Demo Scenarios</b> to practise and <b>Reset to Normal</b> to start clean.</li></ol></div>
+  <div role="tabpanel" id="g-p2" aria-labelledby="g-t2" hidden><h3>Tank Farm</h3><p>Each card shows level against API 2350 setpoints (HH 95 / H 90 / L 10 / LL 5 %).</p><ol><li>Press <b>FILL / HOLD / DRAIN</b> to move a tank. ESD closes XV-101 (stops fill) and XV-102 (stops drain).</li><li>In the <b>NSV calculator</b> enter observed level, temperature, density @ 15 °C and free-water level.</li><li>Read the breakdown: TOV → GOV (TOV − FW) → VCF → NSV. Indicative only; verify with certified tables.</li></ol></div>
+  <div role="tabpanel" id="g-p3" aria-labelledby="g-t3" hidden><h3>ESD Cause &amp; Effect</h3><p>Rows are initiators (I1–I6), columns are actions (A1–A6). Hover a header for the full tag name.</p><ol><li><b>Trip</b> simulates an initiator: its row turns amber, tripped action columns turn red, and the first initiator gets a ① <b>FIRST-OUT</b> badge.</li><li><b>Bypass</b> inhibits an initiator after a confirmation — it is a logged reduction in SIL-3 protection.</li><li>Clear or bypass every active initiator, then press <b>Reset ESD latch</b>. If blocked, the culprit flashes.</li></ol></div>
+  <div role="tabpanel" id="g-p4" aria-labelledby="g-t4" hidden><h3>LPG &amp; Pipeline</h3><ol><li><b>LPG:</b> Start/Stop a skid, move the VFD speed slider (30–50 Hz), and use <b>Swap duty</b>. Pick a fault to see trips (vibration &gt; 7.1 mm/s, suction &lt; 1.0 barg) and standby auto-start.</li><li><b>Interlock override</b> inhibits trips after confirmation — use with care.</li><li><b>Pipeline (API 1130):</b> press <b>Simulate leak</b>, choose the KM; CPM alarms when flow imbalance exceeds 1.5 %. Close sectional valves SV-1/SV-2 to isolate.</li></ol></div>
+  <div role="tabpanel" id="g-p5" aria-labelledby="g-t5" hidden><h3>Loop Calibrator</h3><ol><li>Set LRV, URV, unit and tolerance (default ±0.1 % span).</li><li>Select a test point (0 / 25 / 50 / 75 / 100 % = 4 / 8 / 12 / 16 / 20 mA), source it from your calibrator and enter the <b>Measured mA</b>.</li><li>Read the deviation and PASS/FAIL tag, press <b>Record point</b>, repeat for all five points.</li><li>Add punchlist items (saved locally) and press <b>Export report (CSV)</b>.</li></ol></div>
+  <div class="gfoot"><label class="chk"><input type="checkbox" id="g-skip"> Don't show again on startup</label><button type="button" class="btn pri" id="g-close">Close Guide</button></div></div></dialog>
+<div id="tip" class="tip" role="tooltip" hidden></div>
 <noscript><p style="padding:1rem">JavaScript is required.</p></noscript>
 <script type="module" src="js/app.js"></script>
 </body>

@@ -11,7 +11,7 @@ export function init(el, ctx) {
   list = rd(KP, []); bench = { ...bench, ...rd(KB, {}) };
   let sel = 50;
   el.innerHTML = `<h2>Field Commissioning &amp; Loop Check</h2><div class="dash">
-  <article class="card s6"><h3>4–20 mA test bench</h3>
+  <article class="card s6"><h3>4–20 mA test bench <button type="button" class="info" aria-label="About this view" data-tip="Pick a test point, source it from your calibrator, enter Measured mA. PASS means deviation within the tolerance (default ±0.1 % span). Record each point, then export CSV.">ⓘ</button></h3>
    <div class="pts" role="group" aria-label="Test points">${PTS.map(p => `<button class="btn" data-p="${p}" aria-pressed="${p === sel}">${p}% (${ma(p)}mA)</button>`).join('')}</div>
    <div class="pl-form"><div><label for="lc-lo">LRV</label><input id="lc-lo" type="number" inputmode="decimal"></div><div><label for="lc-hi">URV</label><input id="lc-hi" type="number" inputmode="decimal"></div>
    <div><label for="lc-u">Unit</label><input id="lc-u"></div><div><label for="lc-tol">Tolerance (± % span)</label><input id="lc-tol" type="number" step="0.01" inputmode="decimal"></div></div>

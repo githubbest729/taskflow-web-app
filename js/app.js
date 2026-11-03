@@ -80,9 +80,57 @@ window.addEventListener('popstate', route);     // browser back / forward
 window.addEventListener('pageshow', route);     // bfcache restores
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', route); else route(); // direct /#loop URLs
 
+// ---- Toast, info tooltips, guide, demo scenarios ----
+function toast(msg, ms = 8000) {
+  let t = $('toast');
+  if (!t) { t = document.createElement('div'); t.id = 'toast'; t.className = 'toast'; t.setAttribute('role', 'alert'); document.body.appendChild(t); }
+  t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), ms);
+}
+const tip = $('tip'); let tipFor = null; const canHover = () => matchMedia('(hover:hover)').matches;
+function showTip(b) {
+  tip.textContent = b.dataset.tip; tip.hidden = false; tip.style.maxWidth = Math.min(300, innerWidth - 16) + 'px';
+  const r = b.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), innerWidth - w - 8) + 'px';
+  tip.style.top = (r.bottom + 8 + h > innerHeight - 8 ? r.top - h - 8 : r.bottom + 8) + 'px';
+  tipFor?.removeAttribute('aria-describedby'); b.setAttribute('aria-describedby', 'tip'); tipFor = b;
+}
+function hideTip() { tip.hidden = true; tipFor?.removeAttribute('aria-describedby'); tipFor = null; }
+document.addEventListener('click', e => { const b = e.target.closest('.info'); if (!b) hideTip(); else if (tipFor === b && !canHover()) hideTip(); else showTip(b); });
+document.addEventListener('mouseover', e => { const b = e.target.closest('.info'); if (b && canHover()) showTip(b); });
+document.addEventListener('mouseout', e => { const b = e.target.closest('.info'); if (b && canHover() && b !== document.activeElement) hideTip(); });
+document.addEventListener('focusin', e => { const b = e.target.closest?.('.info'); if (b) showTip(b); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') hideTip(); });
+addEventListener('scroll', hideTip, true);
+
+const gd = $('guide'), GK = 'scada-guide-hide', tabs = [...document.querySelectorAll('#guide [role=tab]')];
+const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) { /* storage blocked */ } };
+function guideTab(i, focus) { tabs.forEach((t, j) => { t.setAttribute('aria-selected', i === j); t.tabIndex = i === j ? 0 : -1; $('g-p' + (j + 1)).hidden = i !== j; }); if (focus) tabs[i].focus(); }
+function openGuide() { $('g-skip').checked = lsGet(GK) === '1'; guideTab(0); if (!gd.open) gd.showModal(); }
+tabs.forEach((t, i) => { t.onclick = () => guideTab(i); t.onkeydown = e => { const k = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: 4 }[e.key]; if (k !== undefined) { e.preventDefault(); guideTab((k + 5) % 5, true); } }; });
+$('help').onclick = openGuide; $('g-close').onclick = () => gd.close();
+gd.addEventListener('click', e => { if (e.target === gd) gd.close(); });
+gd.addEventListener('close', () => { lsSet(GK, $('g-skip').checked ? '1' : null); $('help').focus(); });
+if (lsGet(GK) !== '1') setTimeout(openGuide, 400);
+
+function resetAll() {
+  esd.reset(); tank.reset(); lpg.reset(); pipe.reset(); cdu.reset();
+  alarms.clear(); ctx.s.esd.latched.clear(); drawAlarms();
+}
+const SCN = {
+  normal: ['#home', () => {}, 'Reset to Normal Production: alarms and latches cleared, valves open, Skid A running, tanks holding.'],
+  s1: ['#esd', () => tank.overfill(), 'T-101 overfill: LSHH-101 tripped, ESD A1/A2 latched (first-out I3). To recover, bypass I3 and reset the latch, or use Reset to Normal.'],
+  s2: ['#pipe', () => pipe.leakAt(70), 'Leak at KM 70: CPM imbalance alarm raised. Isolate the section by closing SV-1 (KM 40) and SV-2 (KM 80).'],
+  s3: ['#lpg', () => lpg.vibFault('A'), 'Skid A high vibration: it will trip above 7.1 mm/s and standby Skid B should auto-start.']
+};
+function runScenario(k) { const [h, fn, msg] = SCN[k]; resetAll(); fn(); tick(); tick(); if (location.hash !== h) location.hash = h; toast(msg); }
+$('scn').onchange = e => { if (e.target.value) runScenario(e.target.value); e.target.value = ''; };
+$('reset').onclick = () => runScenario('normal');
+
 // ---- Simulation loop ----
 function tick() {
   esd.tick(ctx); tank.tick(ctx); lpg.tick(ctx); pipe.tick(ctx); cdu.tick(ctx); mimic();
+  if (tipFor && !tipFor.isConnected) hideTip();
   $('clock').textContent = new Date().toLocaleTimeString([], { hour12: false });
 }
 drawAlarms(); tick(); setInterval(tick, 1000);

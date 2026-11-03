@@ -1,7 +1,7 @@
 // ESD Cause & Effect matrix (IEC 61511 / SIL-3 style): latching, bypass, first-out, reset guidance
 const INIT = [['FD-101', 'Fire detector (2oo3)'], ['GD-201', 'Gas detector HH'], ['LSHH-101', 'Tank overfill'], ['PT-301', 'Pipeline rupture'], ['PB-001', 'Manual ESD (CCR)'], ['PB-002', 'Manual ESD (Field)']];
 const ACT = [['XV-101', 'Tank inlet close'], ['XV-102', 'Tank outlet close'], ['P-A/B', 'Pump trip'], ['MOV-301', 'Pipeline SDV close'], ['BDV-401', 'Depressurise open'], ['F-101', 'Fuel gas trip']];
-const MAP = [[0, 1, 2, 5], [0, 1, 2, 4, 5], [0], [2, 3, 4], [0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5]];
+const MAP = [[0, 1, 2, 5], [0, 1, 2, 4, 5], [0, 1], [2, 3, 4], [0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5]];
 const active = INIT.map(() => false), bypass = INIT.map(() => false), eff = INIT.map(() => false), firstOut = new Set();
 let el, ctx, sig = '', foTs = '', flashUntil = 0;
 
@@ -43,7 +43,7 @@ export function tick(c) { ctx = c; evaluate(); const s = c.s.esd.latched.size + 
 function draw() {
   if (!el) return; const L = ctx.s.esd.latched, colOn = a => L.has('A' + (a + 1)), flash = Date.now() < flashUntil;
   ctx.keep(() => {
-    el.innerHTML = `<h2>ESD Cause &amp; Effect <span class="tag ${L.size ? 's-crit' : 's-ok'}">${L.size ? '▲ ESD TRIPPED' : '● HEALTHY'}</span></h2>
+    el.innerHTML = `<h2>ESD Cause &amp; Effect <button type="button" class="info" aria-label="About this view" data-tip="Rows are initiators, columns are shutdown actions. Press Trip to simulate an initiator, Bypass (with confirmation) to inhibit it, then Reset ESD latch once all initiators are clear.">ⓘ</button> <span class="tag ${L.size ? 's-crit' : 's-ok'}">${L.size ? '▲ ESD TRIPPED' : '● HEALTHY'}</span></h2>
   <div class="dash"><article class="card s8"><div class="mx" style="grid-template-columns:72px repeat(${ACT.length},minmax(0,1fr))" role="table" aria-label="Cause and effect matrix">
    <div class="h hdrx" role="columnheader">Cause ↓ / Effect →</div>${ACT.map(([t, n], a) => `<div class="h ${colOn(a) ? 'ch' : ''}" role="columnheader" title="A${a + 1}: ${t} — ${n}" aria-label="A${a + 1} ${t} ${n}">A${a + 1}<small>${t}</small></div>`).join('')}
    ${INIT.map(([t, n], i) => `<div class="h ${eff[i] ? 'rh' : ''}" role="rowheader" title="I${i + 1}: ${t} — ${n}" aria-label="I${i + 1} ${t} ${n}">I${i + 1}${bypass[i] ? ' ◆' : ''}${firstOut.has(i) ? ' ①' : ''}<small>${t}</small></div>${ACT.map((_, a) => { const m = MAP[i].includes(a), hit = eff[i] && m, cls = hit ? 'x' : eff[i] ? 'r' : colOn(a) ? 'c' : ''; return `<div role="cell" class="${cls}" title="${t} → ${ACT[a][0]}">${hit ? '▲' : m ? '✕' : '–'}</div>`; }).join('')}`).join('')}
@@ -56,3 +56,5 @@ function draw() {
   <button class="btn pri" data-k="rst" data-a="reset" data-i="0" style="margin-top:.6rem">Reset ESD latch</button></article></div></div>`;
   });
 }
+
+export function reset() { active.fill(false); bypass.fill(false); eff.fill(false); firstOut.clear(); if (ctx) { ctx.s.esd.latched.clear(); flashUntil = 0; sig = ''; draw(); } }

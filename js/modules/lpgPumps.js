@@ -8,7 +8,7 @@ const $q = id => el.querySelector('#' + id);
 
 export function init(e, c) {
   el = e; ctx = c;
-  el.innerHTML = `<h2>LPG Pumping Station</h2><div class="grid" id="lp-sk"></div>
+  el.innerHTML = `<h2>LPG Pumping Station <button type="button" class="info" aria-label="About this view" data-tip="Skid A/B duty-standby control. Start or Stop a skid, set VFD speed, swap duty, or pick a fault to watch interlocks and auto-standby changeover.">ⓘ</button></h2><div class="grid" id="lp-sk"></div>
   <div class="row" id="lp-ctl" style="margin:.75rem 0"><button class="btn" data-k="sw" data-a="swap" data-i="0">⇄ Swap duty / standby</button><small>Alarm: vib &gt; 4.5 mm/s · Trip: &gt; 7.1 mm/s, suction &lt; 1.0 barg, seal flush loss, overload &gt; 78 A</small></div>
   <div class="dash"><article class="card s8"><div class="row"><h3 style="margin:0">Trend (60 s) &amp; operating curve</h3><div class="row" role="group" aria-label="Skid for trend" style="margin-left:auto">${P.map((p, i) => `<button class="btn" data-sk="${i}" aria-pressed="${i === sel}">Skid ${p.n}</button>`).join('')}</div></div>
    <div class="lp-charts"><svg id="lp-tr" viewBox="0 0 480 220" role="img" aria-label="Motor amps and discharge pressure, last 60 seconds"></svg><svg id="lp-oc" viewBox="0 0 240 220" role="img" aria-label="Discharge pressure versus speed curve"></svg></div></article>
@@ -80,3 +80,6 @@ function draw() {
   <label for="f${i}">Fault simulation</label><select id="f${i}" data-f="${i}" data-k="f${i}">${FAULTS.map(([v, l]) => `<option value="${v}"${p.fault === v ? ' selected' : ''}>${l}</option>`).join('')}</select></article>`; }).join('');
   });
 }
+
+export function reset() { P.forEach((p, i) => Object.assign(p, { role: i ? 'STANDBY' : 'DUTY', run: i === 0, hz: i === 0 ? 48 : 0, sp: 48, trip: '', fault: '', ovr: false, vib: i === 0 ? 2.8 : .1 })); H.A.a.length = H.A.d.length = H.B.a.length = H.B.d.length = 0; if (el && ctx) draw(); }
+export function vibFault(n) { P.find(p => p.n === n).fault = 'vib'; if (el && ctx) draw(); }

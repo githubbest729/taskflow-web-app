@@ -106,3 +106,20 @@ select{min-height:44px;padding:0 .5rem;border-radius:8px;border:1px solid var(--
 .bms .kv b{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;flex-wrap:wrap}
 @media(min-width:1080px){.lp-charts svg{height:100%;min-height:260px}}
 .lp-charts svg{overflow:visible}
+
+/* ===== v6 onboarding ===== */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.demo{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;min-width:0}.demo select{width:auto;max-width:210px}
+.info{position:relative;display:inline-grid;place-items:center;width:24px;height:24px;margin-left:.3rem;padding:0;border:1px solid var(--mut);border-radius:50%;background:transparent;color:var(--mut);font:600 .85rem/1 system-ui;vertical-align:middle;cursor:pointer}
+.info::after{content:"";position:absolute;inset:-10px}
+.info:hover,.info:focus-visible{color:#fff;border-color:var(--cy);background:#12323b}.info:active{transform:scale(.94)}
+.tip{position:fixed;z-index:50;padding:.55rem .75rem;border:1px solid var(--cy);border-radius:8px;background:#0c1015;color:var(--txt);font-size:.85rem;line-height:1.35;box-shadow:0 4px 16px #000a;pointer-events:none}
+.tip[hidden]{display:none}
+dialog.guide{padding:0;width:min(94vw,640px);max-height:90dvh;overflow:auto}
+.gd{padding:1rem}.gd h2{margin-bottom:.5rem}.gd h3{color:var(--cy)}.gd p,.gd ol{margin:.5rem 0}.gd ol{padding-left:1.3rem}.gd li{margin:.3rem 0}
+.gtabs{display:flex;flex-wrap:wrap;gap:.3rem;margin:.5rem 0}
+.gtabs [role=tab]{min-height:44px;padding:0 .7rem;border:1px solid var(--line);border-radius:8px;background:#1f2c38;color:var(--txt);font:inherit;font-weight:600;cursor:pointer}
+.gtabs [role=tab]:hover{border-color:var(--cy)}.gtabs [role=tab][aria-selected=true]{background:#12323b;border-color:var(--cy);color:#fff}
+.gfoot{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;justify-content:space-between;margin-top:1rem;padding-top:.75rem;border-top:1px solid var(--line)}
+.chk{display:flex;align-items:center;gap:.5rem;min-height:44px;margin:0;color:var(--txt);font-size:.9rem}.chk input{width:22px;min-height:22px;height:22px}
+@media(max-width:767px){.demo select{max-width:100%;flex:1 1 150px}}

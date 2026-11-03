@@ -2,7 +2,7 @@
 let cot = 355, sp = 360, feed = 450, rho = 845, purge = 0, chk = 0, el, ctx;
 export function init(e, c) {
   el = e; ctx = c;
-  el.innerHTML = `<h2>Atmospheric Distillation CDU-01</h2><div class="dash">
+  el.innerHTML = `<h2>Atmospheric Distillation CDU-01 <button type="button" class="info" aria-label="About this view" data-tip="COT drives tray temperatures and yields. Move the COT slider, edit feed rate, and use Purge &amp; Reset BMS after a fuel gas trip.">ⓘ</button></h2><div class="dash">
   <article class="card s4"><h3>Column C-101 profile</h3><svg id="cd-svg" viewBox="0 0 300 300" role="img" aria-label="Column tray temperatures"></svg></article>
   <article class="card s4"><h3>Furnace F-101 <span id="cd-tag" class="tag"></span></h3><div id="cd-kv"></div>
    <label for="cd-sp">COT setpoint: <b id="cd-spl">${sp} °C</b></label><input id="cd-sp" type="range" min="340" max="390" step="1" value="${sp}"></article>
@@ -48,3 +48,5 @@ export function tick(c) {
   const chip = (g, t) => `<span class="tag s-${g ? 'ok' : 'crit'}">${g ? '● ' : '▲ '}${t}</span>`;
   $('bm').innerHTML = [['Flame proved', chip(burn === 4, `${burn}/4 Burners ON`)], ['Pilot gas pressure', chip(true, '0.35 barg Healthy')], ['Damper position', `<span class="tag ${ok ? 's-cy' : 's-warn'}">${ok ? '42' : '100'} % Open</span>`], ['Fuel gas SSV (XV-F101)', chip(ok, ok ? 'OPEN' : 'CLOSED')], ['Purge / permissive', chip(ok, ok ? 'COMPLETE' : purge > 0 ? 'PURGING ' + purge + ' s' : 'LOST')]].map(([k, v]) => `<div class="kv"><span>${k}</span><b>${v}</b></div>`).join('');
 }
+
+export function reset() { cot = sp = 360; purge = chk = 0; if (el) { ctx.$('cd-sp').value = sp; ctx.$('cd-spl').textContent = sp + ' °C'; ctx.$('bm-msg').textContent = ''; } }

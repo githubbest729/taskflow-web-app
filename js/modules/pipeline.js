@@ -7,7 +7,7 @@ const P0 = 55, X = km => 64 + km / 120 * 496, Y = p => 220 - p / 60 * 190;
 const bx = v => v.km >= 120 ? X(v.km) - 80 : X(v.km) - 40; // badge x: right-aligned at KM120
 export function init(e, c) {
   el = e; ctx = c;
-  el.innerHTML = `<h2>Crude Pipeline CPM <small>(API 1130)</small></h2><div class="dash">
+  el.innerHTML = `<h2>Crude Pipeline CPM <small>(API 1130)</small> <button type="button" class="info" aria-label="About this view" data-tip="CPM raises a leak alarm when flow in and out differ by more than 1.5 %. Press Simulate leak, choose a KM, then close sectional valves to isolate.">ⓘ</button></h2><div class="dash">
   <article class="card s8"><h3>Hydraulic gradient profile</h3><svg id="pl-svg" viewBox="0 0 620 290" role="img" aria-label="Hydraulic gradient profile KM 0 to 120"></svg></article>
   <div class="s4 stack"><article class="card"><h3>Flow balance</h3><div id="pl-kv"></div><div id="pl-tag" role="status" style="margin-top:.5rem"></div></article>
   <article class="card"><h3>Leak simulation</h3><button class="btn danger" id="pl-leak" aria-pressed="false">Simulate leak</button><label for="pl-km">Leak location: <span id="pl-kml">KM 70</span></label><input id="pl-km" type="range" min="5" max="115" step="5" value="70"></article></div>
@@ -43,3 +43,11 @@ export function tick(c) {
   batches = batches.filter(b => b.tail < 120); if (batches.at(-1).tail >= 20) { seq++; batches.push({ id: 'B-' + seq, prod: seq % 2 ? 'Arab Light' : 'Basrah Medium', head: 0, tail: -20 }); }
   $('pl-b').innerHTML = batches.map(b => `<tr><td>${b.id}</td><td>${b.prod}</td><td>${Math.min(120, b.head).toFixed(1)}</td><td>${Math.max(0, b.tail).toFixed(1)}</td></tr>`).join('');
 }
+
+function sync() {
+  if (!el) return; const $ = ctx.$; $('pl-leak').setAttribute('aria-pressed', leak); $('pl-leak').textContent = leak ? '▲ LEAK ACTIVE' : 'Simulate leak';
+  $('pl-km').value = leakKm; $('pl-kml').textContent = 'KM ' + leakKm;
+  el.querySelectorAll('#pl-v button').forEach((b, i) => { b.setAttribute('aria-pressed', V[i].open); b.textContent = `${V[i].id} KM${V[i].km}: ${V[i].open ? 'OPEN' : '▲ CLOSED'}`; });
+}
+export function reset() { leak = false; leakKm = 70; V.forEach(v => v.open = true); sync(); }
+export function leakAt(km) { leak = true; leakKm = km; V.forEach(v => v.open = true); sync(); }
