@@ -14,7 +14,8 @@ const ctx = {
   raise(id, msg, sev = 'warn') {
     const a = alarms.get(id);
     if (!a) { alarms.set(id, { msg, sev, ts: new Date(), ack: false }); drawAlarms(); }
-    else if (a.msg !== msg || a.sev !== sev) { a.msg = msg; if (a.sev !== sev) a.ack = false; a.sev = sev; drawAlarms(); }
+    else if (a.sev !== sev) { a.msg = msg; a.ack = false; a.sev = sev; drawAlarms(); }
+    else if (a.msg !== msg) { a.msg = msg; const n = document.querySelector(`[data-msg="${id}"]`); if (n) n.textContent = msg; drawBanner(); }
   },
   clear(id) { if (alarms.delete(id)) drawAlarms(); },
   confirm(text) {
@@ -26,18 +27,27 @@ const ctx = {
   keep(fn) { const k = document.activeElement?.dataset?.k; fn(); if (k) document.querySelector(`[data-k="${k}"]`)?.focus(); }
 };
 
+const rank = a => (a.ack ? 2 : 0) + (a.sev === 'crit' ? 0 : 1);
+const sorted = () => [...alarms.entries()].sort((x, y) => rank(x[1]) - rank(y[1]));
+function drawBanner() {
+  const list = sorted(), un = list.filter(([, a]) => !a.ack).length, c = $('alarm-count');
+  c.className = 'tag ' + (un ? 's-crit' : 's-off'); c.textContent = `${un ? '▲' : '○'} UNACK ${un}`;
+  const b = $('alarm-banner'), top = list[0];
+  if (!top) { b.className = 'banner s-off'; b.textContent = '○ No active alarms'; b.removeAttribute('title'); return; }
+  const a = top[1]; b.className = `banner s-${a.sev}${a.ack ? ' ack' : ''}`; b.tabIndex = 0; b.title = a.ack ? '' : 'Click to acknowledge';
+  b.textContent = `${SYM[a.sev]} ${a.sev === 'crit' ? 'CRIT' : 'ADV'}${a.ack ? ' (ACKED)' : ''}: ${a.msg} (${list.length} active, ${un} unack)`;
+}
 function drawAlarms() {
-  const list = [...alarms.entries()].sort((a, b) => (a[1].sev === 'crit' ? 0 : 1) - (b[1].sev === 'crit' ? 0 : 1));
+  const list = sorted();
   $('alarm-list').innerHTML = list.length ? list.map(([id, a]) =>
-    `<li><span class="tag s-${a.sev}">${SYM[a.sev]} ${a.sev === 'crit' ? 'CRITICAL' : 'ADVISORY'}</span><span>${a.msg} <small>${a.ts.toLocaleTimeString()}${a.ack ? ' · ACKED' : ''}</small></span>${a.ack ? '' : `<button class="btn" data-ack="${id}">ACK</button>`}</li>`).join('')
+    `<li class="al ${a.sev} ${a.ack ? 'ack' : 'unack'}"><span class="tag s-${a.sev}">${SYM[a.sev]} ${a.sev === 'crit' ? 'CRITICAL' : 'ADVISORY'}</span><span><b data-msg="${id}">${a.msg}</b> <small>${a.ts.toLocaleTimeString()}${a.ack ? ' · ACKED' : ' · UNACKED'}</small></span>${a.ack ? '' : `<button class="btn" data-ack="${id}">ACK</button>`}</li>`).join('')
     : '<li><span class="s-off">○ No active alarms</span></li>';
-  const b = $('alarm-banner'), top = list.find(([, a]) => !a.ack) || list[0];
-  if (!top) { b.className = 'banner s-off'; b.textContent = '○ No active alarms'; return; }
-  const [, a] = top, unacked = a.sev === 'crit' && !a.ack;
-  b.className = 'banner s-' + a.sev + (unacked ? '' : ''); if (a.ack) b.style.animation = 'none'; else b.style.animation = '';
-  b.textContent = `${SYM[a.sev]} ${a.sev === 'crit' ? 'CRIT' : 'ADV'}: ${a.msg} (${list.length} active)`;
+  drawBanner();
 }
 $('alarm-list').addEventListener('click', e => { const k = e.target.dataset.ack; if (k && alarms.has(k)) { alarms.get(k).ack = true; drawAlarms(); } });
+const ackTop = () => { const t = sorted()[0]; if (t && !t[1].ack) { t[1].ack = true; drawAlarms(); } };
+$('alarm-banner').addEventListener('click', ackTop);
+$('alarm-banner').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); ackTop(); } });
 
 // ---- Mimic ----
 const NODES = [['t', 'T-101', 'tank', 10], ['xv1', 'XV-101', 'valve', 140], ['p', 'P-A/B', 'pump', 270], ['xv2', 'MOV-301', 'valve', 400], ['pl', 'PIPELINE', 'pipe', 530], ['cdu', 'CDU-01', 'column', 690]];
