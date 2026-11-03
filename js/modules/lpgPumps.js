@@ -52,9 +52,9 @@ export function tick(c) {
   charts(); interlocks();
 }
 function charts() {
-  if (!el) return; const p = P[sel], h = H[p.n], N = h.a.length, X = i => 44 + (i + 60 - N) / 59 * 392, Y1 = v => 176 - Math.min(v, 100) / 100 * 150, Y2 = v => 176 - Math.min(v, 25) / 25 * 150;
-  let s = [0, 25, 50, 75, 100].map(v => `<path d="M44 ${Y1(v)}H436" stroke="var(--line)"/><text x="40" y="${Y1(v) + 3}" text-anchor="end">${v}</text><text x="440" y="${Y1(v) + 3}">${v / 4}</text>`).join('');
-  s += [0, 15, 30, 45, 60].map(t => `<text x="${44 + t / 60 * 392}" y="192" text-anchor="middle">${t - 60 || 0}s</text>`).join('');
+  if (!el) return; const p = P[sel], h = H[p.n], N = h.a.length, X = i => 44 + (i + 60 - N) / 59 * 384, Y1 = v => 176 - Math.min(v, 100) / 100 * 150, Y2 = v => 176 - Math.min(v, 25) / 25 * 150;
+  let s = [0, 25, 50, 75, 100].map(v => `<path d="M44 ${Y1(v)}H428" stroke="var(--line)"/><text x="40" y="${Y1(v) + 3}" text-anchor="end">${v}</text><text x="432" y="${Y1(v) + 3}">${v / 4}</text>`).join('');
+  s += [0, 15, 30, 45, 60].map(t => `<text x="${44 + t / 60 * 384}" y="192" text-anchor="middle">${t - 60 || 0}s</text>`).join('');
   s += `<text x="240" y="212" text-anchor="middle" style="font-weight:700">Time (last 60 s)</text><text transform="translate(8 100) rotate(-90)" text-anchor="middle" style="font-weight:700">Motor current (A)</text><text transform="translate(474 100) rotate(90)" text-anchor="middle" style="font-weight:700">Discharge (barg)</text>`;
   s += `<path d="M60 12h24" stroke="var(--cy)" stroke-width="3"/><text x="88" y="16">Amps — Skid ${p.n}</text><path d="M230 12h24" stroke="var(--warn)" stroke-width="3" stroke-dasharray="6 3"/><text x="258" y="16">Discharge P</text>`;
   if (N > 1) s += `<polyline fill="none" stroke="var(--cy)" stroke-width="2.5" points="${h.a.map((v, i) => `${X(i)},${Y1(v)}`).join(' ')}"/><polyline fill="none" stroke="var(--warn)" stroke-width="2.5" stroke-dasharray="6 3" points="${h.d.map((v, i) => `${X(i)},${Y2(v)}`).join(' ')}"/>`;

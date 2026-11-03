@@ -105,3 +105,4 @@ dialog{margin:auto;padding:1rem;border:1px solid var(--cy);border-radius:10px;ba
 select{min-height:44px;padding:0 .5rem;border-radius:8px;border:1px solid var(--line);background:#0c1015;color:var(--txt);font:inherit;max-width:100%}
 .bms .kv b{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;flex-wrap:wrap}
 @media(min-width:1080px){.lp-charts svg{height:100%;min-height:260px}}
+.lp-charts svg{overflow:visible}
